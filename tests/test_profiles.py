@@ -38,17 +38,18 @@ def test_rule2_stationary_stays():
     assert row.precedence(parked, moving) == row.Precedence("a", 2)
 
 
-def test_rule3_larger_footprint_between_moving_nodes():
+def test_rule3_human_escort_outranks_size():
+    a = party(human=True, w=0.3, ln=0.3)
+    b = party(eid=b"\x09" * 8, w=1.5, ln=2.0)
+    assert row.precedence(a, b) == row.Precedence("a", 3)
+    assert row.precedence(b, a) == row.Precedence("b", 3)
+
+
+def test_rule4_larger_footprint_between_moving_nodes():
     big = party(w=1.0, ln=1.2)
     small = party(eid=b"\x09" * 8, w=0.4, ln=0.4)
-    assert row.precedence(big, small) == row.Precedence("a", 3)
+    assert row.precedence(big, small) == row.Precedence("a", 4)
     assert row.precedence(small, big).yields() == "a"
-
-
-def test_rule4_human_escort():
-    a = party(human=True)
-    b = party(eid=b"\x09" * 8)
-    assert row.precedence(a, b) == row.Precedence("a", 4)
 
 
 def test_rule5_lower_ephemeral_id_yields():

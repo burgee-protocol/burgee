@@ -68,12 +68,12 @@ def precedence(a: Party, b: Party) -> Precedence:
     # 2. A stationary node stays; the moving node yields.
     if a.moving != b.moving:
         return Precedence("b" if a.moving else "a", 2)
-    # 3. Between two moving nodes, the larger footprint has right of way.
-    if a.moving and b.moving and a.footprint_area != b.footprint_area:
-        return Precedence("a" if a.footprint_area > b.footprint_area else "b", 3)
-    # 4. A node carrying a human has right of way over one that is not.
+    # 3. A node carrying a human has right of way over one that is not.
     if a.human_escort != b.human_escort:
-        return Precedence("a" if a.human_escort else "b", 4)
+        return Precedence("a" if a.human_escort else "b", 3)
+    # 4. Between two moving nodes, the larger footprint has right of way.
+    if a.moving and b.moving and a.footprint_area != b.footprint_area:
+        return Precedence("a" if a.footprint_area > b.footprint_area else "b", 4)
     # 5. Tie: the node with the lower ephemeral ID yields.
     return Precedence("a" if a.ephemeral_id > b.ephemeral_id else "b", 5)
 
