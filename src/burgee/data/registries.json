@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Burgee registries",
+  "version": "0.1.0",
+  "description": "Canonical enumerations for the Burgee wire format. Markdown tables in this directory are rendered from this file by tools/render_registries.py. A value is never reused once assigned. Changes by BEP only.",
+  "beacon_message_types": {
+    "field": "beacon byte 0, low nibble",
+    "values": [
+      {"value": 0, "name": "IDENTITY", "meaning": "Who the node is and what it can do. Required at Level 0 and above."},
+      {"value": 1, "name": "LOCATION", "meaning": "WGS84 or local-frame position. Optional; indoor nodes omit it."},
+      {"value": 2, "name": "SAFETY", "meaning": "Authority command. Sent only by marks or authority nodes."},
+      {"value": 3, "name": "INTENT", "meaning": "Next three relative waypoints and ETA. Reserved for v0.2."}
+    ]
+  },
+  "node_classes": {
+    "field": "beacon byte 1; card burgee.nodeClass",
+    "values": [
+      {"value": 0, "name": "ground_robot", "meaning": "Wheeled or tracked mobile robot not covered by a more specific class."},
+      {"value": 1, "name": "sidewalk_delivery", "meaning": "Sidewalk or campus delivery robot operating in public space."},
+      {"value": 2, "name": "legged", "meaning": "Quadruped or other legged robot."},
+      {"value": 3, "name": "humanoid", "meaning": "Bipedal humanoid."},
+      {"value": 4, "name": "mark_gate", "meaning": "Fixed node controlling a gate, door or barrier."},
+      {"value": 5, "name": "charger", "meaning": "Fixed node offering a charging connector."},
+      {"value": 6, "name": "lift", "meaning": "Fixed node representing a lift or lift lobby."},
+      {"value": 7, "name": "vehicle", "meaning": "Road or yard vehicle, driven or autonomous."},
+      {"value": 8, "name": "cart_tug", "meaning": "Cart, tug or AMR carrying a load in an industrial setting."},
+      {"value": 255, "name": "other", "meaning": "No listed class applies. The card says more."}
+    ]
+  },
+  "capability_bits": {
+    "field": "beacon bytes 10-11 (uint16, big-endian); card burgee.capabilities",
+    "values": [
+      {"value": 0, "name": "can_yield", "meaning": "Can stop or pull aside on request."},
+      {"value": 1, "name": "can_stop", "meaning": "Can come to a full stop within 1 s of a verified STOP."},
+      {"value": 2, "name": "can_wait", "meaning": "Can hold at a named point for a bounded time."},
+      {"value": 3, "name": "carries_payload", "meaning": "Currently carrying a payload."},
+      {"value": 4, "name": "requests_passage", "meaning": "Will hail marks with access/1 requests."},
+      {"value": 5, "name": "provides_passage", "meaning": "Is a mark that grants passage."},
+      {"value": 6, "name": "provides_charge", "meaning": "Is a mark that offers charging."},
+      {"value": 7, "name": "needs_charge", "meaning": "Battery below the operator's threshold; will seek a charger."},
+      {"value": 8, "name": "human_escort", "meaning": "A person is aboard or is being escorted."},
+      {"value": 9, "name": "priority_emergency", "meaning": "Claims priority class 2. Valid only with a registry countersignature."},
+      {"value": 10, "name": "priority_authority", "meaning": "Claims priority class 3. Valid only with a registry countersignature."},
+      {"value": 11, "name": "negotiates", "meaning": "Conformance Level 2 or above: accepts proposals, not only declines."},
+      {"value": 12, "name": "is_mark", "meaning": "Fixed node."},
+      {"value": 13, "name": "reserved_13", "meaning": "Reserved. Transmit 0, ignore on receipt."},
+      {"value": 14, "name": "reserved_14", "meaning": "Reserved. Transmit 0, ignore on receipt."},
+      {"value": 15, "name": "reserved_15", "meaning": "Reserved. Transmit 0, ignore on receipt."}
+    ]
+  },
+  "node_states": {
+    "field": "beacon byte 12",
+    "values": [
+      {"value": 0, "name": "idle", "meaning": "Powered, stationary, no task."},
+      {"value": 1, "name": "transiting", "meaning": "Moving on a task."},
+      {"value": 2, "name": "waiting", "meaning": "Stationary on a task, holding for a condition or another node."},
+      {"value": 3, "name": "docked", "meaning": "At a charger or dock."},
+      {"value": 4, "name": "emergency_stop", "meaning": "Stopped by a safety trigger; will not move until cleared."},
+      {"value": 5, "name": "degraded", "meaning": "Operating with a known fault; expect reduced capability."},
+      {"value": 6, "name": "servicing", "meaning": "Mark only: currently serving another node."}
+    ]
+  },
+  "priority_classes": {
+    "field": "beacon byte 18; card burgee.priorityClass",
+    "values": [
+      {"value": 0, "name": "standard", "meaning": "Default."},
+      {"value": 1, "name": "service", "meaning": "Maintenance, cleaning, or scheduled service in progress."},
+      {"value": 2, "name": "emergency", "meaning": "Medical, fire or security response. Requires countersignature."},
+      {"value": 3, "name": "authority", "meaning": "Site operator or public authority. Requires countersignature."}
+    ]
+  },
+  "profiles": {
+    "field": "beacon byte 19 bit index; card burgee.profiles[] as id/version",
+    "values": [
+      {"value": 0, "name": "rightofway", "versions": [1], "status": "v0.1", "meaning": "Who yields at a pinch point."},
+      {"value": 1, "name": "access", "versions": [1], "status": "v0.1", "meaning": "A mobile node asks a mark for passage or service."},
+      {"value": 2, "name": "charge", "versions": [], "status": "reserved for v0.2", "meaning": "Negotiating a charging session."},
+      {"value": 3, "name": "handoff", "versions": [], "status": "reserved for v0.2", "meaning": "Transferring a payload between two nodes."},
+      {"value": 4, "name": "safety", "versions": [], "status": "reserved for v0.2", "meaning": "Verified authority commands in full."}
+    ]
+  },
+  "safety_commands": {
+    "field": "SAFETY beacon byte 1; SAFETY_STOP message command",
+    "values": [
+      {"value": 0, "name": "clear", "meaning": "Previous command lifted; resume normal operation."},
+      {"value": 1, "name": "hold", "meaning": "Stop and remain in place until clear."},
+      {"value": 2, "name": "stop", "meaning": "Stop immediately. The only command honored from an unverified beacon."},
+      {"value": 3, "name": "evacuate_corridor", "meaning": "Leave the named zone by the nearest exit; do not enter it."}
+    ]
+  },
+  "reason_codes": {
+    "field": "DECLINE and ABORT messages",
+    "values": [
+      {"value": 1, "name": "busy", "meaning": "Encounter limit reached; retry after the stated backoff."},
+      {"value": 2, "name": "no_profile", "meaning": "The requested profile or action is not supported."},
+      {"value": 3, "name": "policy", "meaning": "The operator's or mark's policy forbids it."},
+      {"value": 4, "name": "unsafe", "meaning": "The local planner judges the proposal unsafe."},
+      {"value": 5, "name": "low_battery", "meaning": "Insufficient energy to comply."},
+      {"value": 6, "name": "payload_locked", "meaning": "Payload state prevents the action."},
+      {"value": 7, "name": "timeout", "meaning": "The counterpart did not answer in time."},
+      {"value": 8, "name": "unverified", "meaning": "Card or token failed verification."},
+      {"value": 9, "name": "priority_lower", "meaning": "The requester's priority class is lower than required."},
+      {"value": 255, "name": "other", "meaning": "No listed reason applies; a text field may say more."}
+    ]
+  },
+  "status_values": {
+    "field": "STATUS message",
+    "values": [
+      {"value": 0, "name": "started", "meaning": "The agreed action has begun."},
+      {"value": 1, "name": "waiting", "meaning": "Holding for a condition named in the task."},
+      {"value": 2, "name": "done", "meaning": "The agreed action is complete."},
+      {"value": 3, "name": "failed", "meaning": "The agreed action could not be completed; a reason code follows."},
+      {"value": 4, "name": "stopping", "meaning": "Level 1 fallback: the node is coming to a stop and will hold."},
+      {"value": 5, "name": "continuing_slow", "meaning": "Level 1 fallback: the node is continuing on its path at reduced speed."}
+    ]
+  },
+  "layer3_messages": {
+    "field": "Layer 3 message set",
+    "values": [
+      {"value": 1, "name": "HAIL", "meaning": "Initiator opens the encounter: ephemeral ID, card digest, requested profile, nonce."},
+      {"value": 2, "name": "HAIL_ACK", "meaning": "Responder answers: card digest, both nonces signed."},
+      {"value": 3, "name": "CARD_REQUEST", "meaning": "Ask for the full card when the digest is not cached."},
+      {"value": 4, "name": "CARD", "meaning": "The signed card, chunked."},
+      {"value": 5, "name": "PROPOSE", "meaning": "One proposal under a profile; creates an A2A task."},
+      {"value": 6, "name": "ACCEPT", "meaning": "Commits to the proposal."},
+      {"value": 7, "name": "COUNTER", "meaning": "Alternative proposal; the original is cancelled."},
+      {"value": 8, "name": "DECLINE", "meaning": "Declines with a reason code."},
+      {"value": 9, "name": "STATUS", "meaning": "Progress on an agreed task."},
+      {"value": 10, "name": "ABORT", "meaning": "Cancels an agreed task."},
+      {"value": 11, "name": "SAFETY_STOP", "meaning": "Authority command with full token; highest priority."},
+      {"value": 12, "name": "BYE", "meaning": "Closes the encounter. Carries no A2A payload."}
+    ]
+  }
+}

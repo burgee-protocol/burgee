@@ -1,0 +1,10 @@
+Burgee — Open Robot Proximity Protocol
+Copyright 2026 The Burgee Protocol Authors
+
+This product includes the Burgee specification and registries, licensed
+under the Apache License, Version 2.0 (code) and CC BY 4.0 (specification
+text). See LICENSE and GOVERNANCE.md.
+
+Burgee is a transport binding and Agent Card profile for the Agent2Agent
+(A2A) protocol, a Linux Foundation project. A2A is a trademark of its
+respective owners. Bluetooth is a trademark of Bluetooth SIG, Inc.
