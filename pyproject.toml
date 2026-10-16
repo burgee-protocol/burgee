@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "burgee"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Reference implementation of Burgee, the open robot proximity protocol: BLE identity beacons and an A2A handshake between robots that share no network."
 readme = "README.md"
 license = "Apache-2.0"

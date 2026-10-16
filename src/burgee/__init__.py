@@ -9,7 +9,7 @@ from .card import AgentCard, BurgeeExtension, Operator, RegistryKey, build_card
 from .encounter import Encounter, Handler, Level1Handler, Node, Role, State
 from .identity import NodeKey
 
-__version__ = "0.1.0a1"
+__version__ = "0.1.0a2"
 
 __all__ = [
     "__version__",

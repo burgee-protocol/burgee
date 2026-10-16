@@ -471,3 +471,35 @@ def test_stale_beacon_timestamp_does_not_count(clock, key_a, card_a, key_b, card
     assert initiator.observe(stale, -50, clock()) is False
     assert initiator.observe(stale, -50, clock()) is False
     assert initiator.sightings[stale.ephemeral_id].consecutive == 0
+
+
+def test_handheld_always_initiates_and_is_never_hailed(clock, key_a, card_a, key_b):
+    from burgee.card import Operator
+
+    phone = Node(
+        key_b,
+        make_card(
+            key_b,
+            "reader-app",
+            level=1,
+            node_class=NodeClass.handheld,
+            profiles=["rightofway/1"],
+            footprint=(0.6, 0.6, 1.7),
+            operator=Operator("Burgee Reader", "https://burgeeprotocol.org/reader", ""),
+        ),
+        handler=AcceptAll(),
+        clock=clock,
+    )
+    rover = Node(key_a, card_a, handler=AcceptAll(), clock=clock)
+    assert phone.is_handheld and not phone.is_mark
+    bea = rover.identity_beacon(state=NodeState.transiting)
+    assert phone.observe(bea, -50, clock()) is False
+    assert phone.observe(bea, -50, clock()) is True  # Level 1 but handheld: hails, whatever the IDs
+    # a robot never hails a handheld, even one that (against the spec) advertises
+    phone_bea = phone.identity_beacon(state=NodeState.transiting)
+    assert rover.observe(phone_bea, -50, clock()) is False
+    assert rover.observe(phone_bea, -50, clock()) is False
+    link = LoopbackLink()
+    ep, er = handshake(phone, rover, link, clock())
+    assert ep.state is State.VERIFIED and er.state is State.VERIFIED
+    assert er.peer.card.burgee.node_class is NodeClass.handheld

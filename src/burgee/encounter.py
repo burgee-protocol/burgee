@@ -818,6 +818,7 @@ class Node:
         self.is_mark = (
             bool(card_.burgee.capabilities & int(Capability.is_mark)) or card_.burgee.node_class in MARK_CLASSES
         )
+        self.is_handheld = card_.burgee.node_class is NodeClass.handheld
 
     # ---- identity on the air ---------------------------------------------------------------
 
@@ -876,11 +877,17 @@ class Node:
             return False
         if not (beacon.profiles & profile_bits(self.card.burgee.profiles)):
             return False
-        if self.is_mark or self.card.burgee.conformance_level < 2:
-            return False  # a mark never initiates; a Level 1 node is hailable, not hailing
+        if beacon.node_class is NodeClass.handheld:
+            return False  # a handheld is never hailed; it does the hailing
+        if self.is_mark:
+            return False  # a mark never initiates
+        if self.card.burgee.conformance_level < 2 and not self.is_handheld:
+            return False  # a Level 1 robot is hailable, not hailing; a Level H handheld hails by definition
         if any(e.peer.ephemeral_id == eid and e.state is not State.CLOSED for e in self.encounters):
             return False
         peer_is_mark = bool(beacon.capabilities & int(Capability.is_mark)) or beacon.node_class in MARK_CLASSES
+        if self.is_handheld:
+            return len(self.open_encounters()) < self.max_encounters  # always the initiator, whatever the IDs
         if not peer_is_mark and not identity.should_initiate(self.ephemeral_id, eid):
             # The higher ephemeral ID waits 500 ms for the lower one to hail before trying itself.
             if qualified_at is None or now - qualified_at < INITIATOR_WAIT_S:
